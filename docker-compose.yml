@@ -1,0 +1,70 @@
+version: "3"
+
+services:
+    # appDC1:
+    #   image: your-app-image:latest
+    #   build:
+    #     context: ./App
+    #     dockerfile: Dockerfile
+    #   environment:
+    #     - ASPNETCORE_ENVIRONMENT=Development
+    #     - CassandraNode=CassandraDC1
+    #   ports:
+    #     - "5000:5000"
+    #   networks:
+    #     - net1
+
+    # appDC2:
+    #   image: your-app-image:latest
+    #   build:
+    #     context: ./App
+    #     dockerfile: Dockerfile
+    #   environment:
+    #     - ASPNETCORE_ENVIRONMENT=Development
+    #     - CassandraNode=CassandraDC2
+    #   ports:
+    #     - "5001:5000"
+    #   networks:
+    #     - net2
+
+    CassandraDC1:
+        image: cassandra:4.1.2
+        ports:
+            - 3100:7000
+            - 9042:9042
+        environment:
+            - CASSANDRA_CLUSTER_NAME=MyCluster
+            - CASSANDRA_DC=DC1
+            - CASSANDRA_RACK=RAC1
+            - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+            - CASSANDA_SEEDS=CassandraDC2
+        networks:
+            - net1
+            - shared_net
+        volumes:
+            - cassandra_data_dc1:/var/lib/cassandra/data
+
+    CassandraDC2:
+        image: cassandra:4.1.2
+        ports:
+            - 3101:7000
+            - 9043:9042
+        environment:
+            - CASSANDRA_CLUSTER_NAME=MyCluster
+            - CASSANDRA_DC=DC2
+            - CASSANDRA_RACK=RAC1
+            - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+        networks:
+            - net2
+            - shared_net
+        volumes:
+            - cassandra_data_dc2:/var/lib/cassandra/data
+
+networks:
+    net1:
+    net2:
+    shared_net:
+
+volumes:
+    cassandra_data_dc1:
+    cassandra_data_dc2:
